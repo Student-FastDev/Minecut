@@ -55,10 +55,6 @@ The Windows release includes the model, Python runtime, PyTorch, and FFmpeg. You
 
 Minecut uses a custom PyTorch audiovisual event spotter inspired by [AdaSpot: Spend Resolution Where It Matters for Precise Event Spotting](https://openaccess.thecvf.com/content/CVPR2026/html/Xarles_AdaSpot_Spend_Resolution_Where_It_Matters_for_Precise_Event_Spotting_CVPR_2026_paper.html) (Xarles et al., CVPR 2026). AdaSpot learns an adaptive high-resolution region of interest. Minecut instead uses a **fixed centre crop**, adds a full-rate motion branch and audio gating, and predicts separate break and place sequences. It is an adaptation, not the published AdaSpot model.
 
-<div align="center">
-    <img src="docs/architecture.svg" alt="Detailed Minecut model computation graph with tensor shapes" width="1100px">
-</div>
-
 **Input and windowing:** Constant-frame-rate source video is decoded into a 224 × 128 global view and a 160 × 160 centre detail view. The global view is padded to 224 × 160 and concatenated with the detail view, yielding 160 × 384 RGB proxy frames. The model processes **96-frame windows** with a **48-frame stride**. It takes the central 48 positions `[24, 72)` from each window and assembles them on the source timeline, preserving their timestamps. At 60 fps, one window spans 1.6 seconds and each core covers 0.8 seconds. Windows include neighbouring context and are not limited to one event.
 
 **Visual encoders:** The global and centre views run through separate `regnety_002` CNNs every other frame. Both use 368-dimensional features and adapted [Gate-Shift-Fuse](https://arxiv.org/abs/2203.08897) modules for temporal feature exchange. The two streams are interpolated back to all 96 source-frame positions, projected by separate MLPs, and merged by an elementwise maximum. The CNN family follows [Designing Network Design Spaces](https://openaccess.thecvf.com/content_CVPR_2020/html/Radosavovic_Designing_Network_Design_Spaces_CVPR_2020_paper.html) (Radosavovic et al., CVPR 2020).

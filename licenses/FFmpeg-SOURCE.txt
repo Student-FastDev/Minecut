@@ -1,0 +1,4 @@
+Bundled FFmpeg 7.1.1 essentials build from gyan.dev (GPLv3).
+Source and build details: https://www.gyan.dev/ffmpeg/builds/
+FFmpeg 7.1.1 source: https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz
+See the bundled FFmpeg-LICENSE.txt and dependency notices.

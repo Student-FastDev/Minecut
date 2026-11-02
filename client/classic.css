@@ -647,3 +647,15 @@ summary:focus-visible {
 .advanced-group .grid2 + .grid2 {
   margin-top: 12px;
 }
+/* Minecut panel frame */
+main {
+  margin: 14px auto 12px;
+  width: calc(100% - 24px);
+  max-width: 680px;
+  padding: 18px 18px 12px;
+  background: #19231b;
+  border: 2px solid #718760;
+  border-top-color: #a4b890;
+  border-left-color: #91a77e;
+  box-shadow: inset 2px 2px #253529, inset -2px -2px #101710, 0 2px 0 #111;
+}

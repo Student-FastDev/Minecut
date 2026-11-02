@@ -1,0 +1,649 @@
+@font-face {
+  font-family: Minecraft;
+  src: url("assets/minecraft.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  background: #242424;
+  color: #d7d7d7;
+  font:
+    12px "Segoe UI",
+    system-ui,
+    sans-serif;
+  line-height: 1.4;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+  background: #383838;
+  border: 1px solid #161616;
+  border-top-color: #555;
+  border-left-color: #4c4c4c;
+  box-shadow: inset -1px -1px #2c2c2c;
+  border-radius: 2px;
+  padding: 7px 12px;
+}
+button:hover {
+  background: #454545;
+  color: white;
+}
+button:active {
+  background: #303030;
+  border-color: #161616;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+img {
+  image-rendering: pixelated;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1e1e1e;
+  padding: 15px 18px;
+  border-bottom: 1px solid #101010;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand img {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(2px 2px #0a0a0a);
+}
+h1 {
+  font:
+    24px Minecraft,
+    monospace;
+  color: #eee;
+  margin: 0;
+  text-shadow: 2px 2px #0c0c0c;
+  line-height: 1;
+}
+.version {
+  font:
+    12px Minecraft,
+    monospace;
+  color: #747474;
+}
+main {
+  padding: 16px 18px 10px;
+  max-width: 650px;
+  margin: auto;
+}
+.source {
+  padding: 12px;
+  background: #1c1c1c;
+  border: 1px solid #111;
+  box-shadow: inset 0 1px #333;
+}
+.source-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.source-file strong {
+  font-size: 12px;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.badge {
+  font:
+    9px "Segoe UI",
+    sans-serif;
+  color: #777;
+  flex-shrink: 0;
+}
+.source p {
+  font-size: 10px;
+  color: #777;
+  line-height: 1.4;
+  margin: 5px 0 12px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.source .row button {
+  flex: 1;
+  padding: 6px 3px;
+}
+.section {
+  margin-top: 18px;
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+h2 {
+  font:
+    16px Minecraft,
+    monospace;
+  font-weight: 400;
+  margin: 0;
+  color: #c9c9c9;
+}
+.presets {
+  display: flex;
+  gap: 8px;
+}
+.presets button,
+.link {
+  padding: 0;
+  background: none !important;
+  border: 0;
+  box-shadow: none;
+  font-size: 10px;
+  color: #a0a0a0;
+}
+.presets button:hover,
+.link:hover {
+  color: #eee;
+  text-decoration: underline;
+}
+.segmented {
+  display: flex;
+  gap: 6px;
+}
+.segmented > button {
+  height: 50px;
+  flex: 1;
+  font:
+    16px Minecraft,
+    monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 6px;
+  white-space: nowrap;
+  color: #a5a5a5;
+}
+.segmented img {
+  width: 26px;
+  height: 26px;
+  filter: drop-shadow(2px 2px #0007);
+}
+.segmented button.active {
+  border: 1px solid #a6a6a6;
+  box-shadow: inset 0 0 0 1px #212121;
+  background: #414141;
+  color: #fff;
+}
+.both-items {
+  position: relative;
+  width: 33px;
+  height: 29px;
+  display: block;
+  flex-shrink: 0;
+}
+.both-items img {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  left: 0;
+  top: 0;
+}
+.both-items img:last-child {
+  left: 12px;
+  top: 9px;
+  width: 18px;
+  height: 18px;
+}
+.field-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 13px 0 7px;
+  font-size: 11px;
+  color: #999;
+}
+.chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+.chip {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px 3px 7px;
+  color: #ddd;
+  background: #343434;
+  border: 1px solid #777;
+  box-shadow: inset 0 0 0 1px #242424;
+  font:
+    16px Minecraft,
+    monospace;
+}
+.chip img {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(2px 2px #111);
+}
+.chip[aria-pressed="false"] {
+  border-color: #373737;
+  background: #282828;
+  box-shadow: none;
+  color: #767676;
+}
+.chip[aria-pressed="false"] img {
+  opacity: 0.38;
+  filter: grayscale(0.35);
+}
+.chip[aria-pressed="true"]:after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 3px;
+  height: 3px;
+  background: #c9c9c9;
+}
+.timing {
+  padding-top: 17px;
+  border-top: 1px solid #383838;
+  margin-top: 18px;
+}
+.section-heading select {
+  font-size: 11px;
+  width: 90px;
+  padding: 4px 6px;
+  background: #303030;
+  border: 1px solid #161616;
+  box-shadow: inset 0 1px #414141;
+}
+select {
+  background: #303030;
+  border: 1px solid #161616;
+  border-radius: 2px;
+  padding: 6px;
+  width: 100%;
+}
+.padding-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.padding-inputs label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.padding-inputs label > span {
+  font-size: 11px;
+  color: #aaa;
+}
+.padding-inputs label > div {
+  display: flex;
+  align-items: center;
+  border: 1px solid #111;
+  box-shadow: inset 1px 1px #141414;
+  background: #1b1b1b;
+  min-width: 0;
+  flex: 1;
+  padding: 5px 7px;
+}
+.padding-inputs input {
+  font:
+    16px Minecraft,
+    monospace;
+  width: 100%;
+  min-width: 0;
+  background: none;
+  border: 0;
+  padding: 2px;
+  outline: 0;
+  color: #eee;
+}
+.unit-label {
+  font-size: 10px;
+  color: #777;
+}
+.settings {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.check input {
+  appearance: none;
+  background: #191919;
+  border: 1px solid #111;
+  box-shadow: inset 1px 1px #111;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.check input:checked:after {
+  content: "✓";
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 11px;
+  text-align: center;
+  color: #d5d5d5;
+}
+.sampling {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 10px;
+  color: #999;
+}
+.sampling input {
+  width: 40px;
+  border: 1px solid #111;
+  background: #1b1b1b;
+  padding: 4px;
+  font:
+    16px Minecraft,
+    monospace;
+  color: #eee;
+}
+.sampling span {
+  display: none;
+}
+.micro {
+  font-size: 10px;
+  color: #858585;
+  margin: 7px 0;
+  line-height: 1.5;
+}
+#sampleHint {
+  text-align: right;
+  font-size: 9px;
+  margin: 5px 0 0;
+  min-height: 12px;
+}
+.advanced {
+  margin: 14px 0;
+  border-top: 1px solid #383838;
+  border-bottom: 1px solid #383838;
+  padding: 10px 0;
+}
+.advanced summary {
+  color: #a0a0a0;
+  cursor: pointer;
+  font-size: 11px;
+}
+.advanced[open] summary {
+  margin-bottom: 12px;
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.grid2 label,
+.full-label {
+  color: #888;
+  font-size: 10px;
+}
+.grid2 select {
+  margin-top: 4px;
+}
+.full-label {
+  display: block;
+  margin: 12px 0;
+}
+.full-label input {
+  display: block;
+  width: 100%;
+  padding: 7px;
+  background: #1b1b1b;
+  border: 1px solid #111;
+  color: #ddd;
+  margin-top: 4px;
+}
+.advanced .row button {
+  font-size: 11px;
+  flex: 1;
+  padding: 5px;
+}
+.advanced > .link {
+  margin: 10px 0 0;
+}
+.runtime {
+  font-size: 10px;
+  color: #929c86;
+  margin-top: 8px;
+}
+.primary {
+  width: 100%;
+  font:
+    16px Minecraft,
+    monospace;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: #50524b;
+  border-color: #878a7d #292b25 #22241e #797d70;
+  color: #f0f1ec;
+  text-shadow: 1px 1px #111;
+  box-shadow: inset 0 0 0 1px #46483f;
+}
+.primary:hover {
+  background: #606359;
+}
+.primary img {
+  width: 20px;
+  height: 20px;
+}
+.footer-note {
+  font-size: 9px;
+  color: #727272;
+  text-align: center;
+  margin: 8px 0 0;
+}
+.progress,
+.result {
+  padding: 12px 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #383838;
+}
+.progress strong {
+  font-size: 11px;
+  font-weight: 400;
+}
+progress {
+  width: 100%;
+  height: 7px;
+  border: 1px solid #111;
+  margin: 10px 0;
+  appearance: none;
+  background: #141414;
+}
+progress::-webkit-progress-bar {
+  background: #141414;
+}
+progress::-webkit-progress-value {
+  background: #8d9d64;
+}
+.result-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+.result-stats b {
+  display: block;
+  font:
+    20px Minecraft,
+    monospace;
+  color: #ddd;
+}
+.result-stats span {
+  font-size: 9px;
+  color: #888;
+}
+.error {
+  font-size: 11px;
+  color: #e6a296;
+  border-left: 2px solid #9d5245;
+  background: #302725;
+  padding: 10px;
+  margin: 10px 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.hidden {
+  display: none !important;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 1px solid #d0d0d0;
+  outline-offset: 2px;
+}
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #4b4b4b;
+}
+@media (max-width: 350px) {
+  main {
+    padding: 12px;
+  }
+  .segmented > button {
+    font-size: 16px;
+    gap: 3px;
+  }
+  .segmented img {
+    width: 21px;
+    height: 21px;
+  }
+  .chip {
+    font-size: 14px;
+  }
+  .settings {
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .check {
+    font-size: 10px;
+  }
+  .sampling {
+    font-size: 9px;
+  }
+  .sampling input {
+    width: 35px;
+  }
+}
+@media (min-width: 540px) {
+  .chips {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+.advanced-group {
+  border: 0;
+  border-bottom: 1px solid #383838;
+  margin: 0 0 14px;
+  padding: 4px 0 14px;
+  min-width: 0;
+}
+.advanced-group legend {
+  font:
+    14px Minecraft,
+    monospace;
+  color: #bfc2b7;
+  padding: 0 0 8px;
+}
+.grid2 input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin-top: 4px;
+  padding: 6px;
+  color: #ddd;
+  background: #1b1b1b;
+  border: 1px solid #111;
+}
+.grid2 label {
+  min-width: 0;
+}
+.full-label select {
+  margin-top: 4px;
+}
+.advanced-group .check {
+  margin-top: 8px;
+}
+
+.time-estimate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 220px;
+  max-width: 100%;
+  margin: 8px auto 12px;
+  padding: 10px 14px;
+  background: #30312d;
+  border: 2px solid;
+  border-color: #797d70 #161714 #161714 #797d70;
+  box-shadow:
+    inset -2px -2px #41443c,
+    inset 2px 2px #20211e;
+  text-align: center;
+}
+.time-estimate span {
+  font-size: 10px;
+  color: #aeb0a6;
+}
+.progress .time-estimate strong {
+  font:
+    20px Minecraft,
+    monospace;
+  line-height: 1.25;
+  color: #e0e6d5;
+  text-shadow: 2px 2px #151610;
+}
+.advanced-group .grid2 + .grid2 {
+  margin-top: 12px;
+}

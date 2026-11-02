@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Minecut</title>
+    <link rel="stylesheet" href="classic.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <img src="assets/shears.png" alt="" />
+        <h1>Minecut</h1>
+      </div>
+      <span class="version">1.2.1</span>
+    </header>
+    <main>
+      <section class="source">
+        <div class="source-file">
+          <strong id="sourceName">No video selected</strong
+          ><span id="sourceBadge" class="badge">SOURCE</span>
+        </div>
+        <p id="sourceScope">Choose a video or use a selected Premiere clip.</p>
+        <div class="row">
+          <button id="browse">Browse...</button
+          ><button id="selection">Use selection</button>
+        </div>
+      </section>
+      <section class="section">
+        <div class="section-heading">
+          <h2>Interactions</h2>
+          <div class="presets">
+            <button data-preset="ores" title="Breaking, ores only">
+              Ores only</button
+            ><button data-preset="mining" title="Breaking, all blocks">
+              All blocks</button
+            ><button data-preset="building" class="hidden" tabindex="-1">
+              Building
+            </button>
+          </div>
+        </div>
+        <div
+          class="segmented"
+          id="actions"
+          role="group"
+          aria-label="Interaction type"
+        >
+          <button data-value="break" class="active" aria-pressed="true">
+            <img src="assets/pickaxe.png" alt="" />Mine</button
+          ><button data-value="place" aria-pressed="false">
+            <img src="assets/placing.png" alt="" />Place</button
+          ><button data-value="all" aria-pressed="false">
+            <span class="both-items"
+              ><img src="assets/pickaxe.png" alt="" /><img
+                src="assets/placing.png"
+                alt="" /></span
+            >Both
+          </button>
+        </div>
+        <div class="field-title">
+          <span>Blocks</span
+          ><button id="allCategories" class="link">Select all</button>
+        </div>
+        <div
+          id="categories"
+          class="chips"
+          role="group"
+          aria-label="Block categories"
+        ></div>
+      </section>
+      <section class="section timing">
+        <div class="section-heading">
+          <h2>Clip timing</h2>
+          <select id="unit" aria-label="Padding unit">
+            <option value="frames">Frames</option>
+            <option value="seconds">Seconds</option>
+          </select>
+        </div>
+        <div class="padding-inputs">
+          <label
+            ><span>Before</span>
+            <div>
+              <input
+                id="before"
+                type="number"
+                min="0"
+                max="3600"
+                value="3"
+                aria-label="Padding before"
+              /><small class="unit-label">fr</small>
+            </div></label
+          ><label
+            ><span>After</span>
+            <div>
+              <input
+                id="after"
+                type="number"
+                min="0"
+                max="3600"
+                value="6"
+                aria-label="Padding after"
+              /><small class="unit-label">fr</small>
+            </div></label
+          >
+        </div>
+        <div class="settings">
+          <label
+            class="check"
+            title="Keep the highest-confidence event in each overlapping group. Nearby genuine events can also be removed."
+            ><input id="duplicates" type="checkbox" checked />Remove
+            duplicates</label
+          >
+          <div class="sampling">
+            <label for="every">Keep every</label
+            ><input
+              id="every"
+              type="number"
+              min="1"
+              max="10000"
+              value="1"
+              aria-label="Keep every Nth interaction"
+            /><span>event</span>
+          </div>
+        </div>
+        <p id="sampleHint" class="micro">Every matching interaction</p>
+      </section>
+      <details class="advanced">
+        <summary>More settings</summary>
+        <fieldset class="advanced-group">
+          <legend>Max audio</legend>
+          <label class="check"
+            ><input id="maxAudio" type="checkbox" />Cut around the loudest audio
+            peak</label
+          >
+          <p class="micro">
+            Search inside the normal Before / After window, then cut around the
+            peak using these source-frame handles.
+          </p>
+          <div id="peakSettings" class="hidden">
+            <div class="grid2">
+              <label
+                >Frames before peak<input
+                  id="peakBefore"
+                  type="number"
+                  min="0"
+                  max="3600"
+                  value="3" /></label
+              ><label
+                >Frames after peak<input
+                  id="peakAfter"
+                  type="number"
+                  min="0"
+                  max="3600"
+                  value="6"
+              /></label>
+            </div>
+            <label class="full-label"
+              >Peak-search audio track<select id="peakStream">
+                <option value="0">Track 1</option>
+              </select></label
+            >
+            <div class="grid2">
+              <label
+                >Channel<select id="peakChannel">
+                  <option value="loudest">Loudest channel</option>
+                  <option value="left">Left / mono</option>
+                  <option value="right">Right</option>
+                </select></label
+              ><label
+                >Minimum peak (dBFS)<input
+                  id="peakFloor"
+                  type="number"
+                  min="-120"
+                  max="0"
+                  value="-60"
+              /></label>
+            </div>
+            <label class="full-label"
+              >Silent / quiet windows<select id="quietPolicy">
+                <option value="keep">Keep original detection cut</option>
+                <option value="skip">Skip the cut</option>
+              </select></label
+            >
+            <label class="check"
+              ><input id="peakClamp" type="checkbox" />Keep cut inside the
+              search window</label
+            >
+            <p class="micro">
+              Choose game audio to avoid snapping to speech or music. Track
+              selection affects peak search only. Exported audio stays
+              unchanged. Cuts always stay inside the selected clip.
+            </p>
+          </div>
+        </fieldset>
+        <fieldset class="advanced-group">
+          <legend>Selection &amp; pacing</legend>
+          <div class="grid2">
+            <label
+              >Start at event<input
+                id="startEvent"
+                type="number"
+                min="1"
+                max="1000000"
+                value="1" /></label
+            ><label
+              >Maximum clips<input
+                id="maxClips"
+                type="number"
+                min="0"
+                max="1000000"
+                value="0"
+            /></label>
+          </div>
+          <div class="grid2">
+            <label
+              >Clip limit selection<select id="limitMode">
+                <option value="first">First matching clips</option>
+                <option value="even">Spread across the video</option>
+              </select></label
+            ><label
+              >Maximum montage (sec)<input
+                id="maxSeconds"
+                type="number"
+                min="0"
+                max="86400"
+                step="0.1"
+                value="0"
+            /></label>
+          </div>
+          <p class="micro">
+            0 means unlimited. Duration skips whole clips that do not fit. It
+            never shortens them. Start at event works with Keep every.
+          </p>
+          <label class="full-label"
+            >When removing duplicates, keep<select id="duplicateWinner">
+              <option value="confidence">Highest-confidence detection</option>
+              <option value="first">First detection</option>
+              <option value="last">Last detection</option>
+            </select></label
+          >
+          <div class="grid2">
+            <label
+              >Minimum source gap (sec)<input
+                id="minGap"
+                type="number"
+                min="0"
+                max="3600"
+                step="0.1"
+                value="0" /></label
+            ><label
+              >Cut order<select id="cutOrder">
+                <option value="chronological">Chronological</option>
+                <option value="reverse">Reverse clip order</option>
+              </select></label
+            >
+          </div>
+          <p class="micro">
+            Gap skips cuts too close to the previous cut. It adds no empty
+            timeline space. Reverse changes clip order, not playback direction.
+          </p>
+        </fieldset>
+        <div class="grid2">
+          <label
+            >Device<select id="device">
+              <option value="auto">Auto</option>
+              <option value="cuda">NVIDIA GPU</option>
+              <option value="cpu">CPU</option>
+            </select></label
+          ><label
+            >Batch size<select id="batch">
+              <option>1</option>
+              <option>2</option>
+              <option>4</option>
+              <option selected>8</option>
+              <option>16</option>
+              <option>32</option>
+              <option>64</option>
+              <option>128</option>
+            </select></label
+          >
+        </div>
+        <label class="full-label"
+          >Sequence name<input
+            id="sequenceName"
+            placeholder="Minecut - Mining" /></label
+        ><label class="check"
+          ><input id="openAfter" type="checkbox" checked />Open sequence after
+          import</label
+        ><label class="full-label"
+          >Python override<input
+            id="pythonPath"
+            placeholder="Only for source installations"
+        /></label>
+        <p class="micro">
+          Analyzes the original source video. Uses selected clip source in/out
+          points. Timeline effects are not included, speed changes are rejected.
+          CPU processing is slower.
+        </p>
+        <div class="row">
+          <button id="savePreset">Save settings</button
+          ><button id="loadPreset">Load settings</button>
+        </div>
+        <button id="openWork" class="link">Open work folder</button>
+        <div id="runtime" class="runtime">Checking runtime...</div>
+      </details>
+      <section id="progress" class="progress hidden" aria-live="polite">
+        <div class="row">
+          <strong id="stage">Preparing...</strong
+          ><button id="cancel" class="link">Cancel</button>
+        </div>
+        <progress id="progressBar" max="1" value="0"></progress>
+        <div class="time-estimate">
+          <span>Estimated time remaining</span
+          ><strong id="estimate">Estimating...</strong>
+        </div>
+        <div class="row micro">
+          <span id="elapsed">0:00 elapsed</span><span id="percent">0%</span>
+        </div>
+      </section>
+      <section id="result" class="result hidden" aria-live="polite">
+        <div class="result-stats">
+          <div><b id="clipCount">0</b><span>clips</span></div>
+          <div><b id="duration">0:00</b><span>duration</span></div>
+          <div><b id="removed">0</b><span>duplicates removed</span></div>
+        </div>
+        <button id="import" class="primary">Create sequence</button>
+        <p id="resultNotes" class="micro"></p>
+        <div id="importStatus" class="micro"></div>
+        <p class="micro">Review the detections before exporting.</p>
+      </section>
+      <div id="error" class="error hidden" role="alert"></div>
+      <button id="run" class="primary">
+        <img src="assets/shears.png" alt="" /><span id="runLabel"
+          >Analyze video</span
+        >
+      </button>
+      <p id="cacheHint" class="footer-note">
+        Runs locally. Your video stays here.
+      </p>
+    </main>
+    <script src="CSInterface.js"></script>
+    <script src="panel.js"></script>
+  </body>
+</html>

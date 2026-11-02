@@ -3,7 +3,7 @@
 Premiere Pro extension that finds Minecraft block breaks and placements in gameplay footage and turns them into fast cuts.
 
 <div align="center">
-    <img src="docs/menu.png" alt="Minecut extension menu" width="420px">
+    <img src="docs/menu-frame.png" alt="Minecut extension menu" width="420px">
 </div>
 
 ## Prerequisites

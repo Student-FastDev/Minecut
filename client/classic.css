@@ -659,3 +659,10 @@ main {
   border-left-color: #91a77e;
   box-shadow: inset 2px 2px #253529, inset -2px -2px #101710, 0 2px 0 #111;
 }
+.brand img,
+.primary img {
+  background: #19231b;
+  border: 1px solid #a4b890;
+  padding: 2px;
+  box-shadow: inset 1px 1px #253529, inset -1px -1px #101710;
+}

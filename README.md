@@ -90,5 +90,5 @@ The held-out test contained 13,911 grouped interactions across 8.16 usable hours
 ---
 
 <div align="center">  
-    <img src="docs/shears-hq.png" alt="Minecraft shears" width="120px">
+    <img src="docs/shears-hq.png" alt="Minecraft shears" width="72px">
 </div>

@@ -2,7 +2,6 @@ import collections, json, pathlib
 import av, numpy as np, torch
 from torch.utils.data import IterableDataset
 
-
 class StreamWindows(IterableDataset):
     def __init__(self, folder, length=96):
         self.folder = pathlib.Path(folder)

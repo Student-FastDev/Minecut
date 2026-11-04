@@ -5,7 +5,6 @@ import timm, torch
 from torch import nn
 from gsf import _GSF
 
-
 class Shift(nn.Module):
     def __init__(self, conv, length):
         super().__init__()
@@ -15,7 +14,6 @@ class Shift(nn.Module):
 
     def forward(self, x):
         return self.net(torch.cat((self.gs(x[:, : self.fold]), x[:, self.fold :]), dim=1))
-
 
 class Spotter(nn.Module):
     def __init__(self, length=96, pretrained=True, backbone="regnety_002", visual_stride=1):

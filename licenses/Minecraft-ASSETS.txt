@@ -1,4 +1,3 @@
 Textures and ASCII glyph shapes extracted from the owner's installed Minecraft Java 1.21.1.
-Copyright Mojang Studios / Microsoft; no ownership is transferred.
+Copyright Mojang Studios / Microsoft, where no ownership is transferred.
 This is not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
-Check permission for redistribution before public publication.

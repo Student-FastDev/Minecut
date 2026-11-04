@@ -5,7 +5,6 @@ from pathlib import Path
 import av
 import numpy as np
 
-
 def inventory(source):
     with av.open(str(source)) as container:
         return [
@@ -17,7 +16,6 @@ def inventory(source):
             )
             for i, s in enumerate(container.streams.audio)
         ]
-
 
 def frame_peaks(source, data, stream_index, cache, emit):
     source = Path(source)
@@ -54,7 +52,7 @@ def frame_peaks(source, data, stream_index, cache, emit):
         if not container.streams.audio:
             return peaks, 0
         if stream_index >= len(container.streams.audio):
-            raise ValueError("Selected peak-search audio track is unavailable")
+            raise ValueError("Selected peak-search audio track is unavailable.")
         stream = container.streams.audio[stream_index]
         channels = stream.codec_context.channels
         resampler = av.AudioResampler(
@@ -63,10 +61,10 @@ def frame_peaks(source, data, stream_index, cache, emit):
         for decoded in container.decode(stream):
             for frame in resampler.resample(decoded):
                 if frame.pts is None:
-                    raise ValueError("Audio timestamps are missing; cannot align Max audio safely")
+                    raise ValueError("Audio timestamps are missing. Cannot align audio safely.")
                 audio = frame.to_ndarray()
                 if not np.isfinite(audio).all():
-                    raise ValueError("Audio contains invalid samples")
+                    raise ValueError("Audio contains invalid samples.")
                 amplitude = np.abs(audio)
                 values = np.stack(
                     [amplitude.max(axis=0), amplitude[0], amplitude[min(1, channels - 1)]], axis=1
@@ -96,7 +94,7 @@ def frame_peaks(source, data, stream_index, cache, emit):
                     )
                     emit(
                         "progress",
-                        stage="Finding audio peaks",
+                        stage="Finding audio peaks.",
                         fraction=0.98,
                         eta_seconds=(
                             (now - started) * (1 - fraction) / fraction if fraction > 0.01 else None

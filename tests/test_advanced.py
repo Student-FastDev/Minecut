@@ -69,4 +69,4 @@ class AdvancedTests(unittest.TestCase):
             self.assertEqual(inventory(source)[0]['channels'],2)
             with self.assertRaises(ValueError):frame_peaks(source,d,1,tmp,lambda *a,**k:None)
 
-if __name__=='__main__':unittest.main()
+if __name__=='__main__': unittest.main()

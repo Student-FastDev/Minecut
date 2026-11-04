@@ -1,4 +1,4 @@
-"""Pure editorial logic. Source-frame intervals are half-open [in, out)."""
+"""Source-frame intervals are half-open [in, out)."""
 
 import json, math, uuid
 from urllib.parse import quote
@@ -9,13 +9,11 @@ from xml.etree import ElementTree as E
 CATEGORIES = ["ore", "stone", "soil", "wood", "foliage", "constructed", "glass", "other"]
 TICKS = 254016000000
 
-
 def number(o, key, default, low, high, integer=False):
     x = float(o.get(key, default))
     if not math.isfinite(x) or not low <= x <= high or (integer and x != int(x)):
         raise ValueError("Invalid " + key)
     return int(x) if integer else x
-
 
 def select_events(data, options, audio_peaks=None):
     o = dict(options)
@@ -30,7 +28,7 @@ def select_events(data, options, audio_peaks=None):
         raise ValueError("Select at least one valid category")
     unit = o.get("unit", "frames")
     if unit not in ["frames", "seconds"]:
-        raise ValueError("Invalid padding unit")
+        raise ValueError("Invalid padding unit.")
     pre = number(o, "before", 3, 0, 3600 if unit == "frames" else 60, unit == "frames")
     post = number(o, "after", 6, 0, 3600 if unit == "frames" else 60, unit == "frames")
     if unit == "seconds":
@@ -90,7 +88,7 @@ def select_events(data, options, audio_peaks=None):
         b = min(end, f + post)
         if peak_enabled:
             if audio_peaks is None:
-                raise ValueError("Max audio requires source audio analysis")
+                raise ValueError("Max audio requires source audio analysis.")
             import numpy as np
 
             column = {"loudest": 0, "left": 1, "right": 2}[channel]
@@ -195,15 +193,16 @@ def child(parent, tag, text=None, **attrs):
 
 def write_xml(data, plan, name, path):
     """Generate linked video + discrete mono tracks for each original audio channel."""
+
     if not plan["ranges"]:
         raise ValueError("No matching events. Choose other filters or another video.")
     rate = Fraction(data["rate"])
     nominal = round(float(rate))
     ntsc = rate == Fraction(nominal * 1000, 1001)
     if rate.denominator != 1 and not ntsc:
-        raise ValueError("Unsupported edit rate: " + str(rate))
+        raise ValueError("Unsupported edit rate: " + str(rate) + ".")
     if TICKS * rate.denominator % rate.numerator:
-        raise ValueError("Frame rate cannot be represented exactly")
+        raise ValueError("Frame rate cannot be represented exactly.")
     ticks = TICKS * rate.denominator // rate.numerator
 
     def add_rate(p):
@@ -239,7 +238,7 @@ def write_xml(data, plan, name, path):
     tracks = [child(video, "track")]
     channels = int(data.get("channels", 0))
     if channels > 2:
-        raise ValueError("Use mono/stereo source audio; multichannel layouts are not yet supported")
+        raise ValueError("Use mono/stereo source audio. Multichannel layouts are not yet supported.")
     if channels:
         audio = child(media, "audio")
         child(audio, "numOutputChannels", 2)

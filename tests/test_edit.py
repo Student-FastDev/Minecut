@@ -57,4 +57,4 @@ class EditorialTests(unittest.TestCase):
             f=Path(tmp)/'edit.xml';write_xml(d,select_events(d,{}),'Silent',f)
             self.assertIsNone(E.parse(f).find('sequence/media/audio'))
 
-if __name__=='__main__':unittest.main()
+if __name__=='__main__': unittest.main()

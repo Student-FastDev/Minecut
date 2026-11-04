@@ -27,4 +27,4 @@ class EstimateTests(unittest.TestCase):
             e('progress',stage='Using cached analysis')
             self.assertEqual(results[-1]['eta_total_seconds'],1)
 
-if __name__=='__main__':unittest.main()
+if __name__=='__main__': unittest.main()

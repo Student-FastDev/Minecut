@@ -1,10 +1,7 @@
-"""
-File containing an adapted version of GSf implementation by Swathikiran Sudhakaran, https://github.com/swathikirans/GSF
-"""
+"""File containing an adapted version of GSf implementation by Swathikiran Sudhakaran, https://github.com/swathikirans/GSF."""
 
 import torch
 from torch import nn
-
 
 class _GSF(nn.Module):
     def __init__(self, fPlane, num_segments=8, gsf_ch_ratio=100):

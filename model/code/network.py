@@ -10,7 +10,6 @@ from torch import nn
 from torch.nn import functional as F
 from backbone import Spotter as Backbone
 
-
 class ResidualTemporal(nn.Module):
     def __init__(self, dilation):
         super().__init__()
@@ -24,7 +23,6 @@ class ResidualTemporal(nn.Module):
 
     def forward(self, x):
         return self.norm((x + self.net(x)).transpose(1, 2)).transpose(1, 2)
-
 
 class Spotter(nn.Module):
     def __init__(self, pretrained=True, visual_stride=2, length=96):
@@ -66,14 +64,7 @@ class Spotter(nn.Module):
             aux=aux,
         )
 
-
 def decode_sequence(logits, categories, threshold=0.5):
-    """Greedy CTC path with validation-selected blank bias. No distance NMS.
-
-    Pass continuous native-frame logits, not separately decoded overlapping
-    windows. Category is evaluated at the highest-confidence frame in a token
-    run. A blank is allowed between events only two source frames apart.
-    """
     import numpy as np
 
     prob = 1 / (1 + np.exp(-np.clip(np.asarray(logits, dtype=np.float32), -60, 60)))

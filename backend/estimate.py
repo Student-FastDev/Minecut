@@ -3,7 +3,6 @@
 import json, math, time
 from pathlib import Path
 
-
 class Estimate:
     phases = ("video", "audio", "infer", "peaks", "convert", "finish")
 

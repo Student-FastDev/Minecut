@@ -19,9 +19,11 @@
         work = path.join(os.platform() === "win32" ? nodeRequire("process").env.LOCALAPPDATA || os.homedir() : path.join(os.homedir(), "Library", "Caches"), "Minecut");
     }
     function sentencePunctuation(text) {
-        return text.replace(/;\s*([a-z])/g, function(_, letter) {
+        text = String(text || "").trim();
+        text = text.replace(/;\s*([a-z])/g, function(_, letter) {
             return ". " + letter.toUpperCase();
         });
+        return text && !/[.!?...]$/.test(text) ? text + "." : text;
     }
     function showError(e) {
         var box = $("error"), message = sentencePunctuation(e.message || String(e)).replace(/^Error[:.]\s*/, "");
@@ -93,7 +95,7 @@
         $("runLabel").textContent = cached ? "Rebuild cut" : "Analyze video";
         $("cacheHint").textContent = cached ? "Change your cut without analyzing the video again." : "Runs locally. Your video stays here.";
         var first = Number($("startEvent").value) || 1, step = Number($("every").value) || 1;
-        $("sampleHint").textContent = step === 1 && first === 1 ? "Every matching interaction" : "Events " + first + ", " + (first + step) + ", " + (first + 2 * step) + "...";
+        $("sampleHint").textContent = step === 1 && first === 1 ? "Every matching interaction." : "Events " + first + ", " + (first + step) + ", " + (first + 2 * step) + "...";
     }
     function apply(o) {
         setAction(o.action || "break");
@@ -159,7 +161,7 @@
         }
         $("sourceName").textContent = r.name || source.split(/[\\/]/).pop();
         $("sourceName").title = source;
-        $("sourceScope").textContent = r.scope || "Entire original source file";
+        $("sourceScope").textContent = sentencePunctuation(r.scope || "Entire original source file");
         $("sourceBadge").textContent = "READY";
         markChanged();
         clearError();
@@ -343,7 +345,7 @@
         };
         invoke(req, function(p) {
             if (typeof p.eta_total_seconds === "number" && Number.isFinite(p.eta_total_seconds) && p.eta_total_seconds >= 0) etaUntil = Date.now() + p.eta_total_seconds * 1e3;
-            $("stage").textContent = p.stage;
+            $("stage").textContent = sentencePunctuation(p.stage);
             $("progressBar").value = Math.max($("progressBar").value, p.fraction || 0);
             $("percent").textContent = Math.round($("progressBar").value * 100) + "%";
         }, true).then(function(r) {
@@ -391,7 +393,7 @@
                 openAfter: $("openAfter").checked
             });
         }).then(function(r) {
-            $("importStatus").textContent = "Created and saved: " + r.name;
+            $("importStatus").textContent = sentencePunctuation("Created and saved: " + r.name);
         }).catch(function(e) {
             showError(e);
             $("importStatus").textContent = "Inspect Premiere before retrying if an import partially completed.";

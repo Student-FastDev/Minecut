@@ -1,12 +1,14 @@
-"""One private stdin request / JSON-line progress worker; no network listener."""
+"""JSON-line progress worker with no network listener."""
 
 import argparse, json, os, shutil, sys, time, traceback, uuid
 from pathlib import Path
 
-
 def emit(kind, **data):
+    for key in ("stage", "message"):
+        if isinstance(data.get(key), str):
+            text = data[key].rstrip()
+            data[key] = text + "." if text and text[-1] not in ".!?..." else text
     print(json.dumps(dict(type=kind, **data)), flush=True)
-
 
 def main():
     emit = globals()["emit"]
@@ -287,7 +289,6 @@ def main():
         device=data.get("device"),
         rate=data["rate"],
     )
-
 
 if __name__ == "__main__":
     import multiprocessing

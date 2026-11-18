@@ -21,7 +21,7 @@ The Windows release includes the model, Python runtime, PyTorch, and FFmpeg. You
 
 For AMD inference on Windows, install a current AMD graphics driver and the Windows TheRock ROCm/HIP SDK build for your GPU architecture, including rocBLAS and MIOpen. Set `HIP_PATH` to the extracted SDK directory containing `bin`, then restart Premiere. Follow the [ZLUDA Windows HIP setup instructions](https://github.com/vosen/ZLUDA/blob/v7-preview.21/docs/src/hip_sdk.md).
 
-In **More Settings > Device**, select **AMD GPU (ZLUDA, experimental)**. Minecut uses ZLUDA v7-preview.21 with a separate PyTorch 2.7.0 CUDA 11.8 runtime that includes translatable GPU kernels. Both are bundled. Video preparation runs on the CPU. AMD hardware validation is pending. Select **CPU** if the runtime reports a compatibility error.
+In **More Settings > Device**, select **AMD GPU (ZLUDA, experimental)**. Minecut uses ZLUDA v7-preview.21 with a separate PyTorch 2.7.0 CUDA 11.8 runtime that includes translatable GPU kernels. Both are bundled. Video preparation runs on the CPU. Select **CPU** if the runtime reports a compatibility error.
 
 ## Installation
 

@@ -1,6 +1,6 @@
 """JSON-line progress worker with no network listener."""
 
-import argparse, json, os, shutil, sys, time, traceback, uuid
+import argparse, json, os, shutil, subprocess, sys, tempfile, time, traceback, uuid
 from pathlib import Path
 
 def emit(kind, **data):
@@ -10,15 +10,94 @@ def emit(kind, **data):
             data[key] = text + "." if text and text[-1] not in ".!?..." else text
     print(json.dumps(dict(type=kind, **data)), flush=True)
 
+def run_zluda(root, request):
+    if os.name != "nt":
+        raise RuntimeError("AMD GPU mode requires the Windows release.")
+    launcher = root / "runtime" / "zluda" / "zluda.exe"
+    worker = Path("runtime", "minecut-worker", "minecut-worker.exe")
+    if not launcher.is_file() or not (root / worker).is_file():
+        raise RuntimeError("Reinstall the complete experimental Windows release to use ZLUDA.")
+    hip = os.environ.get("HIP_PATH")
+    libraries = ("rocblas.dll", "MIOpen.dll")
+    if not hip or not all((Path(hip) / "bin" / lib).is_file() for lib in libraries):
+        raise RuntimeError(
+            "Set HIP_PATH to the ROCm/HIP SDK with rocBLAS and MIOpen for your AMD GPU, "
+            "then restart Premiere."
+        )
+    if not (root / "runtime" / "amd" / "torch" / "lib" / "torch_cuda.dll").is_file():
+        raise RuntimeError("The AMD PyTorch runtime is missing. Reinstall the experimental release.")
+    with tempfile.TemporaryDirectory(prefix="minecut-zluda-") as folder:
+        job = Path(folder)
+        (job / "request.json").write_text(json.dumps(request), encoding="utf8")
+        response = job / "response.jsonl"
+        response.touch()
+        deadline = time.monotonic() + 180 if request.get("command") == "diagnose" else None
+        offset = 0
+        with subprocess.Popen(
+            [str(launcher), "--", str(worker), "--root", ".", "--zluda-job"],
+            cwd=root,
+            env=dict(
+                os.environ,
+                MINECUT_ZLUDA_JOB=folder,
+                PATH=str(Path(hip) / "bin") + os.pathsep + os.environ.get("PATH", ""),
+            ),
+            stdin=subprocess.DEVNULL,
+            stdout=sys.stderr,
+            stderr=subprocess.STDOUT,
+            creationflags=subprocess.CREATE_NO_WINDOW,
+        ) as proc:
+            while True:
+                finished = proc.poll() is not None
+                if response.stat().st_size > offset:
+                    with response.open("rb") as messages:
+                        messages.seek(offset)
+                        shutil.copyfileobj(messages, sys.stdout.buffer)
+                        offset = messages.tell()
+                    sys.stdout.buffer.flush()
+                if finished:
+                    break
+                if deadline is not None and time.monotonic() >= deadline:
+                    proc.kill()
+                    proc.wait()
+                    raise RuntimeError("ZLUDA timed out checking the AMD GPU. Check the HIP SDK or select CPU.")
+                time.sleep(0.1)
+        if not offset:
+            raise RuntimeError(
+                f"ZLUDA exited before the worker could respond (code {proc.returncode}). "
+                "Check your AMD driver and HIP SDK, or select CPU."
+            )
+        if proc.returncode:
+            with response.open("rb") as messages:
+                if any(line.startswith(b'{"type": "error"') for line in messages):
+                    raise SystemExit(1)
+            raise RuntimeError(f"ZLUDA stopped with exit code {proc.returncode}. Select CPU and retry.")
+
+
 def main():
-    emit = globals()["emit"]
-    estimator = None
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True)
+    parser.add_argument("--zluda-job", action="store_true")
     a = parser.parse_args()
     root = Path(a.root).resolve()
+    if a.zluda_job:
+        job = Path(os.environ.pop("MINECUT_ZLUDA_JOB"))
+        sys.stdout = (job / "response.jsonl").open("a", encoding="utf8", buffering=1)
+        sys.stderr = (job / "worker.log").open("w", encoding="utf8", buffering=1)
+        sys.path.insert(0, str(root / "runtime" / "amd"))
+        request = json.loads((job / "request.json").read_text(encoding="utf8"))
+    else:
+        request = json.loads(sys.stdin.readline())
+        needs_gpu = request.get("command", "analyze") in ("analyze", "diagnose")
+        if needs_gpu and request.get("device") == "zluda":
+            return run_zluda(root, request)
+    run(root, request)
+
+
+def run(root, request):
+    emit = globals()["emit"]
+    estimator = None
     sys.path.insert(0, str(root / "model" / "code"))
-    request = json.loads(sys.stdin.readline())
+    device = request.get("device", "auto")
     cmd = request.get("command", "analyze")
     import engine
     from edit import select_events, write_xml, number
@@ -35,7 +114,7 @@ def main():
     work = Path(request.get("work") or default).resolve()
     if cmd == "media_info":
         source = Path(request["source"]).resolve()
-        key = engine.identity(source, engine.MODEL_SHA, request.get("source_range"))
+        key = engine.identity(source, engine.MODEL_SHA, request.get("source_range"), device)
         cached_events = work / "analysis" / key / "events.json"
         valid = False
         if cached_events.exists():
@@ -56,21 +135,23 @@ def main():
     if cmd == "diagnose":
         import torch
 
+        if device == "zluda":
+            gpu = engine.zluda_device(torch)
+            if (torch.ones(1, device="cuda") + 1).item() != 2:
+                raise RuntimeError("ZLUDA failed the GPU calculation. Select CPU and retry.")
+        else:
+            gpu = torch.cuda.get_device_name(0) if device != "cpu" and torch.cuda.is_available() else None
         emit(
             "result",
             ok=True,
             model_exists=model.exists(),
             ffmpeg=bool(ffmpeg),
-            cuda=torch.cuda.is_available(),
-            gpu=torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
+            cuda=gpu is not None,
+            gpu=gpu,
             torch=torch.__version__,
             python=sys.version.split()[0],
         )
         return
-    default = (
-        Path(os.environ.get("LOCALAPPDATA", str(Path.home() / "Library" / "Caches"))) / "Minecut"
-    )
-    work = Path(request.get("work") or default).resolve()
     work.mkdir(parents=True, exist_ok=True)
 
     lock = (work / ".worker.lock").open("a+b")
@@ -101,7 +182,7 @@ def main():
             emit,
             work,
             meta,
-            request.get("device", "auto"),
+            device,
             int(request.get("batch", 8)),
             request.get("source_range"),
             cached,
@@ -187,7 +268,7 @@ def main():
         batch = int(request.get("batch", 8))
         if not 1 <= batch <= 128:
             raise ValueError("Batch size must be between 1 and 128")
-        key = engine.identity(source, model_hash, request.get("source_range"))
+        key = engine.identity(source, model_hash, request.get("source_range"), device)
         folder = work / "analysis" / key
         events = folder / "events.json"
         metadata = engine.probe(source)
@@ -199,6 +280,10 @@ def main():
             data = json.loads(events.read_text(encoding="utf8"))
             emit("progress", stage="Using cached analysis", fraction=0.4)
         else:
+            if device == "zluda":
+                import torch
+
+                engine.zluda_device(torch)
             prep_started = time.monotonic()
             emit("progress", stage="Preparing video", fraction=0)
             engine.prepare(
@@ -207,11 +292,11 @@ def main():
                 ffmpeg,
                 emit,
                 request.get("source_range"),
-                hardware=request.get("device", "auto") != "cpu",
+                hardware=device in ("auto", "cuda"),
             )
             prep_seconds = time.monotonic() - prep_started
             emit("progress", stage="Loading model", fraction=0.4)
-            data = engine.infer(folder, model, request.get("device", "auto"), batch, emit)
+            data = engine.infer(folder, model, device, batch, emit)
             data["preparation_seconds"] = prep_seconds
             data["edit_source"] = str(source)
             data["identity"] = key

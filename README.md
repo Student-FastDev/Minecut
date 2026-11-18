@@ -12,16 +12,22 @@ To use Minecut, you need:
 
 - **Windows:** 64-bit Windows 10 or 11.
 - **Adobe Premiere Pro:** A version supporting CEP extensions. The panel was tested with Premiere Pro 2026.
-- **Storage:** Several gigabytes for the download, installation, and local analysis cache.
+- **Storage:** About 6 GB for the download. Allow at least 32 GB of free space for extraction and installation, plus space for the analysis cache.
 - **GPU:** An NVIDIA GPU and compatible driver are recommended. CPU processing is available but slower.
 
 The Windows release includes the model, Python runtime, PyTorch, and FFmpeg. You do not need to install Python, Git, or the CUDA toolkit for normal use.
+
+### Experimental AMD GPU support
+
+For AMD inference on Windows, install a current AMD graphics driver and the Windows TheRock ROCm/HIP SDK build for your GPU architecture, including rocBLAS and MIOpen. Set `HIP_PATH` to the extracted SDK directory containing `bin`, then restart Premiere. Follow the [ZLUDA Windows HIP setup instructions](https://github.com/vosen/ZLUDA/blob/v7-preview.21/docs/src/hip_sdk.md).
+
+In **More Settings > Device**, select **AMD GPU (ZLUDA, experimental)**. Minecut uses ZLUDA v7-preview.21 with a separate PyTorch 2.7.0 CUDA 11.8 runtime that includes translatable GPU kernels. Both are bundled. Video preparation runs on the CPU. AMD hardware validation is pending. Select **CPU** if the runtime reports a compatibility error.
 
 ## Installation
 
 1. **Download the Release:**
 
-    Download all three `Minecut-1.2.1.zip.part` files, `Install-Minecut.cmd`, and `Install-Minecut.ps1` from the [latest release](https://github.com/Student-FastDev/Minecut/releases/latest). Put all five files in the same folder.
+    Download all three `Minecut-1.2.2.zip.part` files, `Install-Minecut.cmd`, and `Install-Minecut.ps1` from the [v1.2.2 experimental release](https://github.com/Student-FastDev/Minecut/releases/tag/v1.2.2). Put all five files in the same folder.
 
 2. **Install the Extension:**
 

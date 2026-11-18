@@ -165,10 +165,13 @@
         $("sourceBadge").textContent = "READY";
         markChanged();
         clearError();
-        if (!changed) return;
+        if (changed) refreshMediaInfo();
+    }
+    function refreshMediaInfo() {
         var revision = ++sourceRevision;
         invoke({
             command: "media_info",
+            device: $("device").value,
             source: source,
             source_range: sourceRange
         }, null, false).then(function(info) {
@@ -493,15 +496,26 @@
             windowsHide: true
         });
     };
+    var diagnosticRevision = 0;
+    $("device").onchange = function() {
+        cached = null;
+        markChanged();
+        if (source) refreshMediaInfo();
+        diagnose();
+    };
     function diagnose() {
+        var revision = ++diagnosticRevision;
+        $("runtime").textContent = "Checking runtime...";
         invoke({
-            command: "diagnose"
+            command: "diagnose",
+            device: $("device").value
         }, null, false).then(function(r) {
+            if (revision !== diagnosticRevision) return;
             $("runtime").textContent = r.cuda ? r.gpu : "CPU";
             if (!r.model_exists) showError(Error("Model missing. Reinstall the complete Minecut package."));
             if (!r.ffmpeg) showError(Error("FFmpeg missing. Reinstall the complete Minecut package."));
         }).catch(function(e) {
-            $("runtime").textContent = sentencePunctuation(e.message);
+            if (revision === diagnosticRevision) $("runtime").textContent = sentencePunctuation(e.message);
         });
     }
     window.addEventListener("beforeunload", function() {

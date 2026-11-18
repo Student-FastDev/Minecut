@@ -69,11 +69,13 @@ def sha(path):
         return hashlib.file_digest(f, "sha256").hexdigest()
 
 
-def identity(source, model, source_range=None):
+def identity(source, model, source_range=None, device="auto"):
     p = Path(source).resolve()
     st = p.stat()
     h = hashlib.sha256()
     h.update(json.dumps([str(p), st.st_size, st.st_mtime_ns, model, VERSION]).encode())
+    if device == "zluda":
+        h.update(b"zluda-fp32-v1")
     if source_range is not None:
         h.update(json.dumps(source_range, sort_keys=True).encode())
     with p.open("rb") as f:
@@ -387,6 +389,14 @@ def prepare(source, folder, ffmpeg, emit, source_range=None, hardware=True):
     return row
 
 
+def zluda_device(torch):
+    if torch.cuda.is_available():
+        name = torch.cuda.get_device_name(0)
+        if name.endswith("[ZLUDA]"):
+            return name
+    raise RuntimeError("ZLUDA could not initialize the AMD GPU. Check the driver and HIP_PATH, or select CPU.")
+
+
 def infer(folder, model_path, device_pref, batch, emit):
     import torch
     from network import Spotter, decode_sequence
@@ -395,18 +405,22 @@ def infer(folder, model_path, device_pref, batch, emit):
 
     started = time.monotonic()
     torch.set_num_threads(min(6, os.cpu_count() or 2))
-    device = (
-        "cuda"
-        if device_pref == "auto" and torch.cuda.is_available()
-        else ("cpu" if device_pref == "auto" else device_pref)
-    )
+    device = device_pref
+    if device_pref == "auto":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    elif device_pref == "zluda":
+        zluda_device(torch)
+        torch.backends.cudnn.enabled = False
+        device = "cuda"
     if device not in ["cuda", "cpu"]:
-        raise ValueError("Choose Auto, NVIDIA GPU or CPU")
+        raise ValueError("Choose Auto, NVIDIA GPU, AMD GPU or CPU.")
     if device == "cuda" and not torch.cuda.is_available():
         raise ValueError(
             "CUDA is unavailable. Choose Auto or CPU; check your NVIDIA driver for GPU acceleration."
         )
-    dtype = torch.bfloat16 if device == "cuda" and torch.cuda.is_bf16_supported() else torch.float16
+    native_cuda = device == "cuda" and device_pref != "zluda"
+    label = "AMD GPU (ZLUDA)" if device_pref == "zluda" else device.upper()
+    dtype = torch.bfloat16 if native_cuda and torch.cuda.is_bf16_supported() else torch.float16
 
     torch.backends.cudnn.benchmark = False
     ck = torch.load(model_path, map_location="cpu", weights_only=False)
@@ -426,7 +440,7 @@ def infer(folder, model_path, device_pref, batch, emit):
         StreamWindows(folder),
         batch_size=min(batch, 2 if device == "cpu" else batch),
         num_workers=0,
-        pin_memory=device == "cuda",
+        pin_memory=native_cuda,
     )
     chunk = batch
     last = 0
@@ -439,13 +453,13 @@ def infer(folder, model_path, device_pref, batch, emit):
                 part = {}
                 try:
                     part = {
-                        k: v[j : j + count].to(device, non_blocking=device == "cuda")
+                        k: v[j : j + count].to(device, non_blocking=native_cuda)
                         for k, v in b.items()
                         if k != "start"
                     }
                     with (
                         torch.autocast("cuda", dtype=dtype)
-                        if device == "cuda"
+                        if native_cuda
                         else contextlib.nullcontext()
                     ):
                         out = model(
@@ -457,6 +471,8 @@ def infer(folder, model_path, device_pref, batch, emit):
                         )
                     a = out["tokens"].float().cpu().numpy()
                     c = out["categories"].float().cpu().numpy()
+                    if device_pref == "zluda" and not (np.isfinite(a).all() and np.isfinite(c).all()):
+                        raise RuntimeError("ZLUDA returned invalid model predictions. Select CPU and retry.")
                 except torch.cuda.OutOfMemoryError:
                     del part
                     if count == 1:
@@ -479,7 +495,7 @@ def infer(folder, model_path, device_pref, batch, emit):
                 done = min(n, int(b["start"][-1]) + 72)
                 emit(
                     "progress",
-                    stage="Analyzing on " + device.upper(),
+                    stage="Analyzing on " + label,
                     fraction=0.4 + 0.58 * done / n,
                     frames=done,
                     total_frames=n,
@@ -502,7 +518,7 @@ def infer(folder, model_path, device_pref, batch, emit):
         row,
         events=events,
         threshold=threshold,
-        device=device,
+        device="zluda" if device_pref == "zluda" else device,
         inference_seconds=time.monotonic() - started,
         model_sha256=MODEL_SHA,
     )
